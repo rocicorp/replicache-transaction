@@ -1,8 +1,5 @@
-import {
-  ReplicacheTransaction,
-  Storage,
-  stringCompare,
-} from "./replicache-transaction.js";
+import { ReplicacheTransaction, Storage } from "./replicache-transaction.js";
+import { compareUTF8 } from "compare-utf8";
 import { expect } from "chai";
 import { test } from "mocha";
 import type { JSONValue, ScanOptions } from "replicache";
@@ -36,8 +33,7 @@ class MemStorage implements Storage {
 
   getAllEntries(): [string, JSONValue][] {
     const entries = [...this._map.entries()];
-    // TODO: Use compare-utf8 instead.
-    entries.sort(([a], [b]) => stringCompare(a, b));
+    entries.sort(([a], [b]) => compareUTF8(a, b));
     return entries;
   }
 
@@ -119,4 +115,14 @@ test("ReplicacheTransaction scan", async () => {
   await test(["a", "c"], ["b", "d"], { start: { key: "c" } }, ["c", "d"]);
   await test(["a", "b"], ["bb", "c"], { prefix: "b" }, ["b", "bb"]);
   await test(["a", "b"], ["bb", "c"], { prefix: "b", limit: 1 }, ["b"]);
+  // From compare-utf8 package -- ensure we sorting by utf98
+  await test(["\uFF3A", "\u005A"], [], {}, ["\u005A", "\uFF3A"]);
+  await test(["\u{1D655}", "\uFF3A"], [], {}, ["\uFF3A", "\u{1D655}"]);
+  await test(["\u{1D655}", "\u005A"], [], {}, ["\u005A", "\u{1D655}"]);
+  await test(["\uFF3A"], ["\u005A"], {}, ["\u005A", "\uFF3A"]);
+  await test(["\u{1D655}"], ["\uFF3A"], {}, ["\uFF3A", "\u{1D655}"]);
+  await test(["\u{1D655}"], ["\u005A"], {}, ["\u005A", "\u{1D655}"]);
+  await test([], ["\uFF3A", "\u005A"], {}, ["\u005A", "\uFF3A"]);
+  await test([], ["\u{1D655}", "\uFF3A"], {}, ["\uFF3A", "\u{1D655}"]);
+  await test([], ["\u{1D655}", "\u005A"], {}, ["\u005A", "\u{1D655}"]);
 });

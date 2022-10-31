@@ -9,6 +9,8 @@ import {
   filterAsyncIterable,
 } from "replicache";
 
+import { compareUTF8 } from "compare-utf8";
+
 type CacheMap = Map<string, { value: JSONValue | undefined; dirty: boolean }>;
 
 export interface Storage {
@@ -82,7 +84,8 @@ export class ReplicacheTransaction implements WriteTransaction {
         const merged = mergeAsyncIterables(source, pending, entryCompare);
         const filtered = filterAsyncIterable(
           merged,
-          (entry: any) => entry[1] !== undefined
+          (entry: readonly [string, JSONValue | undefined]) =>
+            entry[1] !== undefined
         ) as AsyncIterable<readonly [string, JSONValue]>;
         return filtered;
       }
@@ -110,22 +113,17 @@ function getCacheEntries(
 ): Iterable<readonly [string, JSONValue | undefined]> {
   const entries = [];
   for (const [key, { value, dirty }] of cache) {
-    if (dirty && stringCompare(key, fromKey) >= 0) {
+    if (dirty && compareUTF8(key, fromKey) >= 0) {
       entries.push([key, value] as const);
     }
   }
-  entries.sort((a, b) => stringCompare(a[0], b[0]));
+  entries.sort((a, b) => compareUTF8(a[0], b[0]));
   return entries;
 }
 
-// TODO: use compare-utf8 instead.
-export function stringCompare(a: string, b: string): number {
-  return a === b ? 0 : a < b ? -1 : 1;
-}
-
-function entryCompare(
+export function entryCompare(
   a: readonly [string, unknown],
   b: readonly [string, unknown]
 ): number {
-  return stringCompare(a[0], b[0]);
+  return compareUTF8(a[0], b[0]);
 }
