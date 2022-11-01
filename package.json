@@ -1,6 +1,6 @@
 {
   "name": "replicache-transaction",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Adapter from Replicache's WriteTransaction interface to some key/value storage.",
   "homepage": "https://github.com/rocicorp/replicache-transaction",
   "repository": "github:rocicorp/replicache-transaction",
