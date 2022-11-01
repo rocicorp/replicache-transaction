@@ -15,8 +15,7 @@
     "test": "mocha --ui=tdd 'lib/**/*.test.js'"
   },
   "peerDependencies": {
-    "replicache": ">=10.0.0",
-    "compare-utf8": ">=0.1.0"
+    "replicache": ">=10.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
@@ -40,5 +39,8 @@
   "types": "./lib/index.d.ts",
   "exports": {
     ".": "./lib/index.js"
+  },
+  "dependencies": {
+    "compare-utf8": "^0.1.0"
   }
 }
