@@ -1,3 +1,3 @@
-import { ReplicacheTransaction, Storage } from "./replicache-transaction";
+import { ReplicacheTransaction, Storage } from "./replicache-transaction.js";
 
 export { ReplicacheTransaction, Storage };
