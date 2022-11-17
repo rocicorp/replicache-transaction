@@ -15,7 +15,7 @@
     "test": "mocha --ui=tdd 'lib/**/*.test.js'"
   },
   "peerDependencies": {
-    "replicache": ">=10.0.0"
+    "replicache": "file:../../replicache-internal/replicache-12.0.0.tgz"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
