@@ -14,7 +14,7 @@ to the database.
 ## Usage
 
 ```ts
-import mutators from "./my-mutators.ts";
+import mutators from './my-mutators.ts';
 
 class MyStorage implements Storage {
   // ...
@@ -24,7 +24,7 @@ const myStorage = new MyStorage(dbconn, spaceID, version);
 const tx = new ReplicacheTransaction(storage, clientID);
 
 const createTodo = mutators.createTodo;
-await createTodo(tx, { title: "Hello, shared mutators", complete: false });
+await createTodo(tx, {title: 'Hello, shared mutators', complete: false});
 
 await tx.flush();
 ```
