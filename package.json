@@ -14,10 +14,9 @@
     "pretest": "npm run build",
     "test": "mocha --ui=tdd 'lib/**/*.test.js'"
   },
-  "peerDependencies": {
-    "replicache": ">=12.0.1"
-  },
+  "peerDependencies": {},
   "devDependencies": {
+    "replicache": "13.0.0-beta.0",
     "@rocicorp/eslint-config": "^0.2.0",
     "@rocicorp/prettier-config": "^0.1.1",
     "@types/chai": "^4.3.0",

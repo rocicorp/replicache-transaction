@@ -35,10 +35,16 @@ export class ReplicacheTransaction implements WriteTransaction {
   private _storage: Storage;
   private _cache: CacheMap = new Map();
 
-  constructor(storage: Storage, clientID: string) {
+  constructor(storage: Storage, clientID: string, mutationID = 0) {
     this._storage = storage;
     this._clientID = clientID;
+    this.mutationID = mutationID;
   }
+
+  readonly reason = 'authoritative';
+  readonly environment = 'server';
+
+  mutationID: number;
 
   get clientID(): string {
     return this._clientID;
