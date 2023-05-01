@@ -52,10 +52,9 @@ class MemStorage implements Storage {
 
 test('ReplicacheTransaction', async () => {
   const s = new MemStorage();
-  const t1 = new ReplicacheTransaction(s, 'c1', 42);
+  const t1 = new ReplicacheTransaction(s, 'c1');
 
   expect(t1.clientID).equal('c1');
-  expect(t1.mutationID).equal(42);
   expect(t1.environment).equal('server');
   expect(t1.reason).equal('authoritative');
   expect(await t1.has('foo')).false;
@@ -69,26 +68,29 @@ test('ReplicacheTransaction', async () => {
 
   expect(await s.getEntry('foo')).equal('bar');
 
-  const t2 = new ReplicacheTransaction(s, 'c1', 1);
+  const t2 = new ReplicacheTransaction(s);
   await t2.del('foo');
   await t2.flush();
 
   expect(await s.getEntry('foo')).equal(undefined);
   expect(s.getAllEntries()).deep.equal([]);
+
+  t1.clientID = 'c2';
+  expect(t1.clientID).equals('c2');
 });
 
 test('ReplicacheTransaction overlap', async () => {
   const s = new MemStorage();
-  const t1 = new ReplicacheTransaction(s, 'c1', 1);
+  const t1 = new ReplicacheTransaction(s);
   await t1.put('foo', 'bar');
 
-  const t2 = new ReplicacheTransaction(s, 'c1', 1);
+  const t2 = new ReplicacheTransaction(s);
   expect(await t2.has('foo')).false;
 
   await t1.flush();
   expect(await t2.has('foo')).false;
 
-  const t3 = new ReplicacheTransaction(s, 'c1', 1);
+  const t3 = new ReplicacheTransaction(s);
   expect(await t3.has('foo')).true;
 });
 
@@ -110,7 +112,7 @@ test('ReplicacheTransaction scan', async () => {
     s.clear();
     await putEntries(sources);
 
-    const t = new ReplicacheTransaction(s, 'c1', 1);
+    const t = new ReplicacheTransaction(s);
     for (const change of changes) {
       await t.put(change, change);
     }

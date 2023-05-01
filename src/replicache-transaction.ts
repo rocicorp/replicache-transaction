@@ -31,24 +31,19 @@ export interface Storage {
  * transaction.
  */
 export class ReplicacheTransaction implements WriteTransaction {
-  private _clientID: string;
   private _storage: Storage;
   private _cache: CacheMap = new Map();
 
-  constructor(storage: Storage, clientID: string, mutationID = 0) {
+  constructor(storage: Storage, clientID = '') {
     this._storage = storage;
-    this._clientID = clientID;
-    this.mutationID = mutationID;
+    this.clientID = clientID;
   }
 
   readonly reason = 'authoritative';
   readonly environment = 'server';
 
-  mutationID: number;
-
-  get clientID(): string {
-    return this._clientID;
-  }
+  clientID: string;
+  mutationID = 0;
 
   // eslint-disable-next-line require-await
   async put(key: string, value: ReadonlyJSONValue): Promise<void> {
