@@ -1,7 +1,6 @@
-import {expect} from 'chai';
 import {compareUTF8} from 'compare-utf8';
-import {test} from 'mocha';
 import type {JSONValue, ScanOptions} from 'replicache';
+import {expect, test} from 'vitest';
 import {ReplicacheTransaction, Storage} from './replicache-transaction.js';
 
 class MemStorage implements Storage {
