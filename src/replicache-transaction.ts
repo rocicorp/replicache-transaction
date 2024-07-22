@@ -1,15 +1,14 @@
+import {compareUTF8} from 'compare-utf8';
 import {
+  filterAsyncIterable,
   isScanIndexOptions,
   makeScanResult,
+  mergeAsyncIterables,
+  ReadonlyJSONValue,
   ScanNoIndexOptions,
   ScanOptions,
   WriteTransaction,
-  mergeAsyncIterables,
-  filterAsyncIterable,
-  ReadonlyJSONValue,
 } from 'replicache';
-
-import {compareUTF8} from 'compare-utf8';
 
 type CacheMap = Map<
   string,
@@ -31,11 +30,11 @@ export interface Storage {
  * transaction.
  */
 export class ReplicacheTransaction implements WriteTransaction {
-  private _storage: Storage;
-  private _cache: CacheMap = new Map();
+  #storage: Storage;
+  #cache: CacheMap = new Map();
 
   constructor(storage: Storage, clientID = '') {
-    this._storage = storage;
+    this.#storage = storage;
     this.clientID = clientID;
   }
 
@@ -47,20 +46,20 @@ export class ReplicacheTransaction implements WriteTransaction {
 
   // eslint-disable-next-line require-await
   async put(key: string, value: ReadonlyJSONValue): Promise<void> {
-    this._cache.set(key, {value, dirty: true});
+    this.#cache.set(key, {value, dirty: true});
   }
   async del(key: string): Promise<boolean> {
     const had = await this.has(key);
-    this._cache.set(key, {value: undefined, dirty: true});
+    this.#cache.set(key, {value: undefined, dirty: true});
     return had;
   }
   async get(key: string): Promise<ReadonlyJSONValue | undefined> {
-    const entry = this._cache.get(key);
+    const entry = this.#cache.get(key);
     if (entry) {
       return entry.value;
     }
-    const value = await this._storage.getEntry(key);
-    this._cache.set(key, {value, dirty: false});
+    const value = await this.#storage.getEntry(key);
+    this.#cache.set(key, {value, dirty: false});
     return value;
   }
   async has(key: string): Promise<boolean> {
@@ -81,7 +80,8 @@ export class ReplicacheTransaction implements WriteTransaction {
       throw new Error('not implemented');
     }
 
-    const {_storage: storage, _cache: cache} = this;
+    const storage = this.#storage;
+    const cache = this.#cache;
 
     return makeScanResult<ScanNoIndexOptions>(options, (fromKey: string) => {
       const source = storage.getEntries(fromKey);
@@ -98,13 +98,13 @@ export class ReplicacheTransaction implements WriteTransaction {
 
   async flush(): Promise<void> {
     await Promise.all(
-      [...this._cache.entries()]
+      [...this.#cache.entries()]
         .filter(([, {dirty}]) => dirty)
         .map(([k, {value}]) => {
           if (value === undefined) {
-            return this._storage.delEntry(k);
+            return this.#storage.delEntry(k);
           }
-          return this._storage.putEntry(k, value);
+          return this.#storage.putEntry(k, value);
         }),
     );
   }

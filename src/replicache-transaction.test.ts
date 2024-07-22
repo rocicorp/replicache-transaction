@@ -1,25 +1,25 @@
-import {ReplicacheTransaction, Storage} from './replicache-transaction.js';
-import {compareUTF8} from 'compare-utf8';
 import {expect} from 'chai';
+import {compareUTF8} from 'compare-utf8';
 import {test} from 'mocha';
 import type {JSONValue, ScanOptions} from 'replicache';
+import {ReplicacheTransaction, Storage} from './replicache-transaction.js';
 
 class MemStorage implements Storage {
-  private _map = new Map<string, JSONValue>();
+  #map = new Map<string, JSONValue>();
 
   // eslint-disable-next-line require-await
   async putEntry(key: string, value: JSONValue): Promise<void> {
-    this._map.set(key, value);
+    this.#map.set(key, value);
   }
 
   // eslint-disable-next-line require-await
   async hasEntry(key: string): Promise<boolean> {
-    return this._map.has(key);
+    return this.#map.has(key);
   }
 
   // eslint-disable-next-line require-await
   async getEntry(key: string): Promise<JSONValue | undefined> {
-    return this._map.get(key);
+    return this.#map.get(key);
   }
 
   async *getEntries(
@@ -35,18 +35,18 @@ class MemStorage implements Storage {
   }
 
   getAllEntries(): [string, JSONValue][] {
-    const entries = [...this._map.entries()];
+    const entries = [...this.#map.entries()];
     entries.sort(([a], [b]) => compareUTF8(a, b));
     return entries;
   }
 
   clear() {
-    this._map.clear();
+    this.#map.clear();
   }
 
   // eslint-disable-next-line require-await
   async delEntry(key: string): Promise<void> {
-    this._map.delete(key);
+    this.#map.delete(key);
   }
 }
 
