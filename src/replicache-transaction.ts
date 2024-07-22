@@ -1,12 +1,17 @@
 import {
+  DeepReadonly,
+  filterAsyncIterable,
+  IndexKey,
   isScanIndexOptions,
   makeScanResult,
+  mergeAsyncIterables,
+  ReadonlyJSONValue,
+  ScanIndexOptions,
   ScanNoIndexOptions,
   ScanOptions,
+  ScanResult,
+  TransactionLocation,
   WriteTransaction,
-  mergeAsyncIterables,
-  filterAsyncIterable,
-  ReadonlyJSONValue,
 } from 'replicache';
 
 import {compareUTF8} from 'compare-utf8';
@@ -40,20 +45,33 @@ export class ReplicacheTransaction implements WriteTransaction {
   }
 
   readonly reason = 'authoritative';
+
+  /** @deprecated Use {@link location} instead. */
   readonly environment = 'server';
+  readonly location: TransactionLocation = 'server';
 
   clientID: string;
   mutationID = 0;
 
+  /**
+   * @deprecated Use {@link set} instead.
+   */
   // eslint-disable-next-line require-await
   async put(key: string, value: ReadonlyJSONValue): Promise<void> {
     this._cache.set(key, {value, dirty: true});
   }
+
+  // eslint-disable-next-line require-await
+  async set(key: string, value: ReadonlyJSONValue): Promise<void> {
+    this._cache.set(key, {value, dirty: true});
+  }
+
   async del(key: string): Promise<boolean> {
     const had = await this.has(key);
     this._cache.set(key, {value: undefined, dirty: true});
     return had;
   }
+
   async get(key: string): Promise<ReadonlyJSONValue | undefined> {
     const entry = this._cache.get(key);
     if (entry) {
@@ -63,6 +81,7 @@ export class ReplicacheTransaction implements WriteTransaction {
     this._cache.set(key, {value, dirty: false});
     return value;
   }
+
   async has(key: string): Promise<boolean> {
     const val = await this.get(key);
     return val !== undefined;
@@ -76,14 +95,28 @@ export class ReplicacheTransaction implements WriteTransaction {
     return true;
   }
 
-  scan(options: ScanOptions = {} as ScanNoIndexOptions) {
+  scan(options: ScanIndexOptions): ScanResult<IndexKey, ReadonlyJSONValue>;
+  scan(options?: ScanNoIndexOptions): ScanResult<string, ReadonlyJSONValue>;
+  scan(options?: ScanOptions): ScanResult<IndexKey | string, ReadonlyJSONValue>;
+  scan<V extends ReadonlyJSONValue>(
+    options: ScanIndexOptions,
+  ): ScanResult<IndexKey, DeepReadonly<V>>;
+  scan<V extends ReadonlyJSONValue>(
+    options?: ScanNoIndexOptions,
+  ): ScanResult<string, DeepReadonly<V>>;
+  scan<V extends ReadonlyJSONValue>(
+    options?: ScanOptions,
+  ): ScanResult<IndexKey | string, DeepReadonly<V>>;
+  scan(
+    options: ScanOptions = {},
+  ): ScanResult<IndexKey | string, ReadonlyJSONValue> {
     if (isScanIndexOptions(options)) {
       throw new Error('not implemented');
     }
 
     const {_storage: storage, _cache: cache} = this;
 
-    return makeScanResult<ScanNoIndexOptions>(options, (fromKey: string) => {
+    return makeScanResult(options, (fromKey: string) => {
       const source = storage.getEntries(fromKey);
       const pending = getCacheEntries(cache, fromKey);
       const merged = mergeAsyncIterables(source, pending, entryCompare);
