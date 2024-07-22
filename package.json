@@ -1,6 +1,6 @@
 {
   "name": "replicache-transaction",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Adapter from Replicache's WriteTransaction interface to some key/value storage.",
   "homepage": "https://github.com/rocicorp/replicache-transaction",
   "repository": "github:rocicorp/replicache-transaction",
@@ -16,7 +16,7 @@
   },
   "peerDependencies": {},
   "devDependencies": {
-    "replicache": "13.0.0-beta.0",
+    "replicache": "15.0.1",
     "@rocicorp/eslint-config": "^0.2.0",
     "@rocicorp/prettier-config": "^0.1.1",
     "@types/chai": "^4.3.0",
