@@ -1,6 +1,8 @@
 import {compareUTF8} from 'compare-utf8';
 import {
+  DeepReadonly,
   filterAsyncIterable,
+  IndexKey,
   isScanIndexOptions,
   makeScanResult,
   mergeAsyncIterables,
@@ -60,7 +62,7 @@ export class ReplicacheTransaction implements WriteTransaction {
 
   // eslint-disable-next-line require-await
   async set(key: string, value: ReadonlyJSONValue): Promise<void> {
-    this._cache.set(key, {value, dirty: true});
+    this.#cache.set(key, {value, dirty: true});
   }
 
   async del(key: string): Promise<boolean> {
