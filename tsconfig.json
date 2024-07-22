@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
+    "module": "NodeNext",
     "strict": true,
     "exactOptionalPropertyTypes": true,
     "noUnusedLocals": true,
@@ -9,16 +9,12 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-    "importsNotUsedAsValues": "error",
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "outDir": "lib",
     "allowJs": true,
-    // esnext for Object.fromEntries
-    "lib": ["dom", "esnext"],
-    "preserveSymlinks": true,
-    "types": ["node"]
+    "preserveSymlinks": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "lib/**/*"]
